@@ -8,8 +8,6 @@ import ProductList from "./components/ProductList"
 import Profile from "./components/Profile"
 import Sidebar from "./components/Sidebar"
 
-// Fake Store API goes down for long stretches (Cloudflare 522), so DummyJSON is a fallback
-// whose items are reshaped to the Fake Store format the components expect
 const sources = [
     { url: "https://fakestoreapi.com/products", parse: data => data },
     {
@@ -22,7 +20,6 @@ const sources = [
     }
 ]
 
-// a 522 takes ~20s to come back, too long to leave the user on Loading...
 const TIMEOUT_MS = 6000
 
 const loadProducts = async () => {
@@ -90,7 +87,6 @@ function App() {
     }
 
     const openSearch = () => {
-        // the search input only exists on the products page, so it must be mounted before focusing
         flushSync(() => setPage("products"))
         search_input.current?.focus()
     }
