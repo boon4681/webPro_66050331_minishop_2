@@ -1,5 +1,5 @@
 import { baht } from "../utils"
-import Icon, { type IconName } from "./Icon"
+import Icon, { type IconName } from "../components/Icon"
 
 type SummaryCardProps = {
     bg: string

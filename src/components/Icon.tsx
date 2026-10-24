@@ -13,7 +13,9 @@ const icons = {
     minus: <path d="M5 12h14" />,
     plus: <path d="M12 5v14M5 12h14" />,
     chevron: <path d="m6 9 6 6 6-6" />,
-    back: <path d="m15 6-6 6 6 6" />
+    back: <path d="m15 6-6 6 6 6" />,
+    chart: <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />,
+    info: <><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></>
 }
 
 export type IconName = keyof typeof icons

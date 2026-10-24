@@ -1,16 +1,43 @@
 import { useState } from "react"
-import type { Product } from "../types"
+import { Link, useNavigate, useParams } from "react-router-dom"
+import Icon from "../components/Icon"
+import StatusMessage from "../components/StatusMessage"
+import { useProducts } from "../hooks/useProducts"
+import { getProductById } from "../models/productModel"
 import { baht } from "../utils"
-import Icon from "./Icon"
 
 type ProductDetailProps = {
-    product: Product
     onAdd: (quantity: number) => void
-    onBack: () => void
 }
 
-function ProductDetail({ product, onAdd, onBack }: ProductDetailProps) {
+function ProductDetail({ onAdd }: ProductDetailProps) {
+    const { id } = useParams()
+    const navigate = useNavigate()
+    const { products, loading, error } = useProducts()
     const [quantity, setQuantity] = useState(1)
+
+    const back_link = (
+        <Link to="/products" className="flex items-center gap-1 w-fit text-sm text-gray-600 hover:text-blue-600">
+            <Icon name="back" className="size-4" /> Back to Products
+        </Link>
+    )
+
+    if (loading) return <StatusMessage>Loading...</StatusMessage>
+    if (error) return <StatusMessage error>{error}</StatusMessage>
+
+    const product = getProductById(products, id)
+
+    if (!product) {
+        return (
+            <>
+                {back_link}
+                <div className="bg-white p-10 mt-4 rounded-xl border border-slate-200 shadow-sm text-center">
+                    <h2 className="text-2xl font-bold text-slate-800">Product not found</h2>
+                    <p className="mt-2 text-gray-600">No product has ID {id}.</p>
+                </div>
+            </>
+        )
+    }
 
     const handleAdd = () => {
         onAdd(quantity)
@@ -19,9 +46,7 @@ function ProductDetail({ product, onAdd, onBack }: ProductDetailProps) {
 
     return (
         <>
-            <button onClick={onBack} className="flex items-center gap-1 text-sm text-gray-600 hover:text-blue-600 cursor-pointer">
-                <Icon name="back" className="size-4" /> Back to Products
-            </button>
+            {back_link}
             <h2 className="mt-2 text-2xl font-bold text-slate-800">Product Detail</h2>
 
             <div className="bg-white p-5 mt-4 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-6">
@@ -47,6 +72,9 @@ function ProductDetail({ product, onAdd, onBack }: ProductDetailProps) {
                     </div>
                     <button onClick={handleAdd} className="w-full mt-4 flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 cursor-pointer">
                         <Icon name="cart" /> Add to Cart
+                    </button>
+                    <button onClick={() => navigate("/products")} className="w-full mt-2 border border-gray-200 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50 cursor-pointer">
+                        Continue Shopping
                     </button>
                 </div>
             </div>

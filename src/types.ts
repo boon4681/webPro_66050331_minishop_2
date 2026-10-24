@@ -11,6 +11,4 @@ export type Product = {
     }
 }
 
-export type Page = "dashboard" | "products" | "profile" | "detail"
-
 export type SortOrder = "asc" | "desc"

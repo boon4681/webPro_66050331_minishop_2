@@ -1,16 +1,34 @@
-# React + Vite
+# MiniShop
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+MiniShop แบบหลายหน้า สร้างด้วย Vite + React + TypeScript + Tailwind CSS v4 + React Router v6
 
-Currently, two official plugins are available:
+```bash
+yarn install
+yarn dev
+```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Routes
 
-## React Compiler
+| URL | หน้า |
+| --- | --- |
+| `/` | Home: ชื่อร้าน สินค้าแนะนำ |
+| `/dashboard` | Dashboard |
+| `/products` | รายการสินค้า ค้นหา กรองหมวดหมู่ และเรียงราคา |
+| `/products/:id` | รายละเอียดสินค้าตาม ID ใน URL |
+| `/about` | ข้อมูลร้าน |
+| `/profile` | Profile |
+| อื่น ๆ | 404 Not Found |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## MVC Thinking
 
-## Expanding the Oxlint configuration
+- **Model** `src/models/productModel.ts` ดึงข้อมูลสินค้าจาก API และหาสินค้าจาก ID
+- **View** `src/pages/`, `src/components/` แสดงผลด้วย JSX และ Tailwind CSS
+- **Controller** `src/hooks/useProducts.ts` กับ event handler ในแต่ละหน้า เช่น อ่าน ID จาก URL แล้วสั่งเปลี่ยนหน้า
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## Link, useNavigate() และ useParams() ต่างกันอย่างไร
+
+- **`<Link>`** เป็น component ที่แสดงเป็นลิงก์ ผู้ใช้คลิกแล้วเปลี่ยนหน้าโดยไม่โหลดเว็บใหม่ ใช้เมื่อรู้ปลายทางตั้งแต่ตอนแสดงผล เช่น `<Link to="/products/1">View Detail</Link>` (`<NavLink>` คือ Link ที่รู้ว่าตัวเองตรงกับ URL ปัจจุบันหรือไม่ จึงใช้ทำเมนูที่ไฮไลต์หน้าปัจจุบันได้)
+- **`useNavigate()`** เป็น hook ที่คืนฟังก์ชันสำหรับเปลี่ยนหน้าจากโค้ด JavaScript ใช้เมื่อต้องเปลี่ยนหน้าหลังเกิดเหตุการณ์ เช่น กดปุ่ม Continue Shopping แล้วเรียก `navigate("/products")`
+- **`useParams()`** ไม่ได้เปลี่ยนหน้า แต่ใช้อ่านค่าที่อยู่ใน URL ตาม pattern ของ Route เช่น Route `/products/:id` เมื่อเปิด `/products/3` จะได้ `id` เป็น string `"3"` จึงต้องแปลงเป็นตัวเลขก่อนนำไปหาสินค้า
+
+สรุป: Link และ useNavigate ใช้ "ไป" หน้าอื่น (Link ให้ผู้ใช้คลิก, useNavigate สั่งจากโค้ด) ส่วน useParams ใช้ "อ่าน" ข้อมูลจาก URL ของหน้าปัจจุบัน
