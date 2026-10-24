@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react"
-import StatusMessage from "../components/StatusMessage"
+import Icon from "../components/Icon"
 import { createProduct, deleteProduct, getProducts, updateProduct, type StoreProduct } from "../services/productApi"
 import { baht } from "../utils"
 
@@ -11,8 +11,10 @@ function ProductManagement() {
     const [products, setProducts] = useState<StoreProduct[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
+    const [notice, setNotice] = useState("")
     const [form, setForm] = useState(empty_form)
     const [editingId, setEditingId] = useState<number | null>(null)
+    const [isModalOpen, setIsModalOpen] = useState(false)
     const [formError, setFormError] = useState("")
     const [saving, setSaving] = useState(false)
 
@@ -29,10 +31,36 @@ function ProductManagement() {
         loadProducts()
     }, [])
 
-    const resetForm = () => {
-        setForm(empty_form)
+    const closeModal = () => {
+        setIsModalOpen(false)
         setEditingId(null)
+        setForm(empty_form)
         setFormError("")
+    }
+
+    useEffect(() => {
+        if (!isModalOpen) return
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") closeModal()
+        }
+        window.addEventListener("keydown", onKeyDown)
+        return () => window.removeEventListener("keydown", onKeyDown)
+    }, [isModalOpen])
+
+    const openAddModal = () => {
+        setEditingId(null)
+        setForm(empty_form)
+        setFormError("")
+        setNotice("")
+        setIsModalOpen(true)
+    }
+
+    const startEdit = (product: StoreProduct) => {
+        setEditingId(product.id)
+        setForm({ name: product.name, price: String(product.price), category: product.category || categories[0] })
+        setFormError("")
+        setNotice("")
+        setIsModalOpen(true)
     }
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -54,7 +82,8 @@ function ProductManagement() {
             const data = { name, price, category: form.category }
             if (editingId === null) await createProduct(data)
             else await updateProduct(editingId, data)
-            resetForm()
+            setNotice(editingId === null ? `เพิ่ม ${name} แล้ว` : `บันทึกการแก้ไข ${name} แล้ว`)
+            closeModal()
             await loadProducts()
         } catch {
             setFormError("บันทึกข้อมูลไม่สำเร็จ")
@@ -63,134 +92,152 @@ function ProductManagement() {
         }
     }
 
-    const handleEdit = (product: StoreProduct) => {
-        setEditingId(product.id)
-        setForm({ name: product.name, price: String(product.price), category: product.category })
-        setFormError("")
-    }
-
     const handleDelete = async (product: StoreProduct) => {
         if (!confirm(`ต้องการลบ ${product.name} ใช่หรือไม่?`)) return
+        setNotice("")
         try {
             await deleteProduct(product.id)
-            if (editingId === product.id) resetForm()
+            setNotice(`ลบ ${product.name} แล้ว`)
             await loadProducts()
         } catch {
             setError("ลบสินค้าไม่สำเร็จ")
         }
     }
 
-    const input_class = "w-full mt-1 bg-white px-3 py-2.5 rounded-lg border border-gray-200 text-sm outline-none focus:border-blue-500"
-
     return (
-        <>
-            <h2 className="text-2xl font-bold text-slate-800">Product Management</h2>
-            <p className="mt-1 text-sm text-gray-500">จัดการสินค้าผ่าน REST API ที่ http://localhost:3001/products</p>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
-                <form onSubmit={handleSubmit} noValidate className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm h-fit">
-                    <h3 className="font-semibold text-gray-800">{editingId === null ? "Add Product" : `Edit Product #${editingId}`}</h3>
-
-                    <label className="block mt-4 text-sm text-gray-700">
-                        Name
-                        <input
-                            type="text"
-                            value={form.name}
-                            onChange={(event) => setForm({ ...form, name: event.target.value })}
-                            placeholder="เช่น Mouse"
-                            className={input_class}
-                        />
-                    </label>
-
-                    <label className="block mt-3 text-sm text-gray-700">
-                        Price (บาท)
-                        <input
-                            type="number"
-                            step="any"
-                            value={form.price}
-                            onChange={(event) => setForm({ ...form, price: event.target.value })}
-                            placeholder="เช่น 450"
-                            className={input_class}
-                        />
-                    </label>
-
-                    <label className="block mt-3 text-sm text-gray-700">
-                        Category
-                        <select
-                            value={form.category}
-                            onChange={(event) => setForm({ ...form, category: event.target.value })}
-                            className={input_class}
-                        >
-                            {categories.map(item => <option key={item} value={item}>{item}</option>)}
-                        </select>
-                    </label>
-
-                    {formError && <p className="mt-3 text-sm text-red-600">{formError}</p>}
-
-                    <button
-                        type="submit"
-                        disabled={saving}
-                        className="w-full mt-4 bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-60 cursor-pointer"
-                    >
-                        {editingId === null ? "Add Product" : "Save Changes"}
-                    </button>
-                    {editingId !== null && (
-                        <button
-                            type="button"
-                            onClick={resetForm}
-                            className="w-full mt-2 border border-gray-200 text-gray-700 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-50 cursor-pointer"
-                        >
-                            Cancel
-                        </button>
-                    )}
-                </form>
-
-                <div className="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <h3 className="font-semibold text-gray-800">Products</h3>
-                    {loading ? (
-                        <StatusMessage>Loading...</StatusMessage>
-                    ) : error ? (
-                        <StatusMessage error>{error}</StatusMessage>
-                    ) : products.length === 0 ? (
-                        <StatusMessage>ยังไม่มีสินค้า</StatusMessage>
-                    ) : (
-                        <div className="mt-3 overflow-x-auto">
-                            <table className="w-full text-sm text-left text-gray-700">
-                                <thead className="bg-slate-100 text-gray-600">
-                                    <tr>
-                                        <th className="py-2 px-3 font-medium">ID</th>
-                                        <th className="py-2 px-3 font-medium">Name</th>
-                                        <th className="py-2 px-3 font-medium">Category</th>
-                                        <th className="py-2 px-3 font-medium text-right">Price</th>
-                                        <th className="py-2 px-3 font-medium text-right">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {products.map(product => (
-                                        <tr key={product.id} className={`border-b border-gray-100 last:border-0 ${product.id === editingId ? "bg-blue-50" : ""}`}>
-                                            <td className="py-2.5 px-3">{product.id}</td>
-                                            <td className="py-2.5 px-3 font-medium text-gray-900">{product.name}</td>
-                                            <td className="py-2.5 px-3">{product.category}</td>
-                                            <td className="py-2.5 px-3 text-right">{baht(product.price)}</td>
-                                            <td className="py-2.5 px-3">
-                                                <div className="flex justify-end gap-2">
-                                                    <button onClick={() => handleEdit(product)} className="px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 cursor-pointer">
-                                                        Edit
-                                                    </button>
-                                                    <button onClick={() => handleDelete(product)} className="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 cursor-pointer">
-                                                        Delete
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                </div>
+        <section className="space-y-4">
+            <div className="breadcrumbs text-sm">
+                <ul>
+                    <li>Admin</li>
+                    <li>Products</li>
+                </ul>
             </div>
-        </>
+
+            <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <h1 className="text-2xl font-bold">Product Management</h1>
+                    <p className="mt-1 text-sm opacity-60">เพิ่ม แก้ไข และลบสินค้าผ่าน REST API</p>
+                </div>
+                <button onClick={openAddModal} className="btn btn-primary">
+                    <Icon name="plus" className="size-4" /> Add Product
+                </button>
+            </div>
+
+            {notice && (
+                <div role="status" className="alert alert-success alert-soft">
+                    <span>{notice}</span>
+                </div>
+            )}
+
+            {loading ? (
+                <div className="flex flex-col items-center gap-3 p-10">
+                    <span className="loading loading-spinner loading-lg" />
+                    <p className="opacity-70">Loading...</p>
+                </div>
+            ) : error ? (
+                <div role="alert" className="alert alert-error">
+                    <span>{error}</span>
+                </div>
+            ) : products.length === 0 ? (
+                <div role="alert" className="alert">
+                    <span>ยังไม่มีสินค้า</span>
+                </div>
+            ) : (
+                <div className="overflow-x-auto rounded-box bg-base-100 border border-base-300 shadow-sm">
+                    <table className="table table-zebra max-sm:table-sm">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th className="hidden sm:table-cell">Category</th>
+                                <th className="text-right">Price</th>
+                                <th className="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {products.map(product => (
+                                <tr key={product.id}>
+                                    <td>
+                                        <p className="font-medium">{product.name}</p>
+                                        <p className="text-xs opacity-60">ID {product.id}</p>
+                                        <span className="badge badge-outline badge-sm mt-1 sm:hidden">{product.category}</span>
+                                    </td>
+                                    <td className="hidden sm:table-cell"><span className="badge badge-outline">{product.category}</span></td>
+                                    <td className="text-right">{baht(product.price)}</td>
+                                    <td>
+                                        <div className="flex justify-end gap-2">
+                                            <button type="button" onClick={() => startEdit(product)} className="btn btn-outline btn-sm">
+                                                Edit
+                                            </button>
+                                            <button type="button" onClick={() => handleDelete(product)} className="btn btn-error btn-soft btn-sm">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            {isModalOpen && (
+                <div className="modal modal-open" role="dialog" aria-modal="true" aria-labelledby="product-modal-title">
+                    <form onSubmit={handleSubmit} noValidate className="modal-box max-h-[90vh] max-w-lg overflow-y-auto">
+                        <h3 id="product-modal-title" className="text-lg font-bold">
+                            {editingId === null ? "Add Product" : `Edit Product #${editingId}`}
+                        </h3>
+
+                        <fieldset className="fieldset mt-4">
+                            <label className="fieldset-legend" htmlFor="product-name">Name</label>
+                            <input
+                                id="product-name"
+                                autoFocus
+                                value={form.name}
+                                onChange={(event) => setForm({ ...form, name: event.target.value })}
+                                placeholder="Product name"
+                                className="input w-full"
+                            />
+
+                            <label className="fieldset-legend" htmlFor="product-price">Price (บาท)</label>
+                            <input
+                                id="product-price"
+                                type="number"
+                                step="any"
+                                value={form.price}
+                                onChange={(event) => setForm({ ...form, price: event.target.value })}
+                                placeholder="Price"
+                                className="input w-full"
+                            />
+
+                            <label className="fieldset-legend" htmlFor="product-category">Category</label>
+                            <select
+                                id="product-category"
+                                value={form.category}
+                                onChange={(event) => setForm({ ...form, category: event.target.value })}
+                                className="select w-full"
+                            >
+                                {categories.map(item => <option key={item}>{item}</option>)}
+                            </select>
+                        </fieldset>
+
+                        {formError && (
+                            <div role="alert" className="alert alert-error alert-soft mt-4">
+                                <span>{formError}</span>
+                            </div>
+                        )}
+
+                        <div className="modal-action">
+                            <button type="button" onClick={closeModal} className="btn">Cancel</button>
+                            <button type="submit" disabled={saving} className="btn btn-primary">
+                                {saving && <span className="loading loading-spinner loading-sm" />}
+                                {editingId === null ? "Add Product" : "Save Changes"}
+                            </button>
+                        </div>
+                    </form>
+                    <div className="modal-backdrop" onClick={closeModal} />
+                </div>
+            )}
+        </section>
     )
 }
 
