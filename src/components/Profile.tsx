@@ -1,7 +1,16 @@
 import { baht } from "../utils"
-import Icon from "./Icon"
+import Icon, { type IconName } from "./Icon"
 
-function SummaryCard({ bg, color, icon, filled, label, value }) {
+type SummaryCardProps = {
+    bg: string
+    color: string
+    icon: IconName
+    filled?: boolean
+    label: string
+    value: number | string
+}
+
+function SummaryCard({ bg, color, icon, filled, label, value }: SummaryCardProps) {
     return (
         <div className={`p-4 rounded-xl ${bg}`}>
             <div className={`size-9 rounded-full bg-white/70 ${color} flex items-center justify-center`}>

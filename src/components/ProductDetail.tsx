@@ -1,8 +1,15 @@
 import { useState } from "react"
+import type { Product } from "../types"
 import { baht } from "../utils"
 import Icon from "./Icon"
 
-function ProductDetail({ product, onAdd, onBack }) {
+type ProductDetailProps = {
+    product: Product
+    onAdd: (quantity: number) => void
+    onBack: () => void
+}
+
+function ProductDetail({ product, onAdd, onBack }: ProductDetailProps) {
     const [quantity, setQuantity] = useState(1)
 
     const handleAdd = () => {

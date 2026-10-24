@@ -1,1 +1,1 @@
-export const baht = (value) => `฿${value.toLocaleString("en-US")}`
+export const baht = (value: number) => `฿${value.toLocaleString("en-US")}`

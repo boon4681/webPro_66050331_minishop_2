@@ -7,15 +7,29 @@ import ProductDetail from "./components/ProductDetail"
 import ProductList from "./components/ProductList"
 import Profile from "./components/Profile"
 import Sidebar from "./components/Sidebar"
+import type { Page, Product, SortOrder } from "./types"
 
-const sources = [
-    { url: "https://fakestoreapi.com/products", parse: data => data },
+type Source = {
+    url: string
+    parse: (data: unknown) => Product[]
+}
+
+type DummyJsonResponse = {
+    products: (Omit<Product, "image" | "rating"> & {
+        thumbnail: string
+        rating: number
+        reviews: unknown[]
+    })[]
+}
+
+const sources: Source[] = [
+    { url: "https://fakestoreapi.com/products", parse: data => data as Product[] },
     {
         url: "https://dummyjson.com/products",
-        parse: data => data.products.map(item => ({
+        parse: data => (data as DummyJsonResponse).products.map(({ thumbnail, rating, reviews, ...item }) => ({
             ...item,
-            image: item.thumbnail,
-            rating: { rate: item.rating, count: item.reviews.length }
+            image: thumbnail,
+            rating: { rate: rating, count: reviews.length }
         }))
     }
 ]
@@ -34,27 +48,29 @@ const loadProducts = async () => {
     throw new Error("all product sources failed")
 }
 
-const pages = ["dashboard", "products", "profile", "detail"]
+const pages: Page[] = ["dashboard", "products", "profile", "detail"]
 
-const sort_options = [
+const isPage = (value: string): value is Page => (pages as string[]).includes(value)
+
+const sort_options: { value: SortOrder, label: string }[] = [
     { value: "asc", label: "Price Low → High" },
     { value: "desc", label: "Price High → Low" }
 ]
 
 function App() {
-    const [page, setPage] = useState(() => {
+    const [page, setPage] = useState<Page>(() => {
         const hash = location.hash.slice(1)
-        return pages.includes(hash) ? hash : "dashboard"
+        return isPage(hash) ? hash : "dashboard"
     })
-    const [products, setProducts] = useState([])
+    const [products, setProducts] = useState<Product[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
     const [cartCount, setCartCount] = useState(0)
     const [search, setSearch] = useState("")
     const [category, setCategory] = useState("All")
-    const [sort, setSort] = useState("")
-    const [detailId, setDetailId] = useState(null)
-    const search_input = useRef(null)
+    const [sort, setSort] = useState<SortOrder | "">("")
+    const [detailId, setDetailId] = useState<number | null>(null)
+    const search_input = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
         loadProducts()
@@ -81,7 +97,7 @@ function App() {
 
     const addToCart = (quantity = 1) => setCartCount(count => count + quantity)
 
-    const showDetail = (id) => {
+    const showDetail = (id: number) => {
         setDetailId(id)
         setPage("detail")
     }

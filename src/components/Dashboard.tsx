@@ -1,7 +1,25 @@
 import { baht } from "../utils"
-import Icon from "./Icon"
+import Icon, { type IconName } from "./Icon"
 
-const orders = [
+type OrderStatus = "Completed" | "Processing" | "Shipped" | "Pending"
+
+type Order = {
+    date: string
+    customer: string
+    items: number
+    total: number
+    status: OrderStatus
+}
+
+type StatCardProps = {
+    bg: string
+    color: string
+    icon: IconName
+    label: string
+    value: number | string
+}
+
+const orders: Order[] = [
     { date: "2025-09-15", customer: "Somchai J.", items: 3, total: 1260, status: "Completed" },
     { date: "2025-09-14", customer: "Nattaya K.", items: 1, total: 520, status: "Processing" },
     { date: "2025-09-13", customer: "Kritsada P.", items: 2, total: 980, status: "Shipped" },
@@ -9,14 +27,14 @@ const orders = [
     { date: "2025-09-11", customer: "Thanawat C.", items: 4, total: 1800, status: "Pending" }
 ]
 
-const status_colors = {
+const status_colors: Record<OrderStatus, string> = {
     Completed: "bg-green-50 text-green-600 border-green-200",
     Processing: "bg-blue-50 text-blue-600 border-blue-200",
     Shipped: "bg-purple-50 text-purple-600 border-purple-200",
     Pending: "bg-orange-50 text-orange-600 border-orange-200"
 }
 
-function StatCard({ bg, color, icon, label, value }) {
+function StatCard({ bg, color, icon, label, value }: StatCardProps) {
     return (
         <div className="flex items-center gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
             <div className={`size-12 rounded-full ${bg} ${color} flex items-center justify-center`}>

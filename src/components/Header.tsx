@@ -1,6 +1,13 @@
 import Icon from "./Icon"
 
-function Header({ cartCount, onSearch, onCart, onProfile }) {
+type HeaderProps = {
+    cartCount: number
+    onSearch: () => void
+    onCart: () => void
+    onProfile: () => void
+}
+
+function Header({ cartCount, onSearch, onCart, onProfile }: HeaderProps) {
     return (
         <header className="flex items-center justify-between px-5 py-3 border-b border-gray-200">
             <h1 className="text-2xl font-bold text-blue-600">MiniShop</h1>

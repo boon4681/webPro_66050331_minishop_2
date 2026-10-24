@@ -1,6 +1,13 @@
+import type { Product } from "../types"
 import ProductCard from "./ProductCard"
 
-function ProductList({ products, onAdd, onDetail }) {
+type ProductListProps = {
+    products: Product[]
+    onAdd: () => void
+    onDetail: (id: number) => void
+}
+
+function ProductList({ products, onAdd, onDetail }: ProductListProps) {
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {products.map(product => (

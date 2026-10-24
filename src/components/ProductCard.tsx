@@ -1,7 +1,18 @@
 import { baht } from "../utils"
 import Icon from "./Icon"
 
-function ProductCard({ name, price, image, category, rating, reviews, onAdd, onDetail }) {
+type ProductCardProps = {
+    name: string
+    price: number
+    image: string
+    category: string
+    rating: number
+    reviews: number
+    onAdd: () => void
+    onDetail: () => void
+}
+
+function ProductCard({ name, price, image, category, rating, reviews, onAdd, onDetail }: ProductCardProps) {
     return (
         <div className="flex flex-col bg-white p-3 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition">
             <button onClick={onDetail} className="w-full aspect-[5/4] bg-slate-100 rounded-lg overflow-hidden cursor-pointer">

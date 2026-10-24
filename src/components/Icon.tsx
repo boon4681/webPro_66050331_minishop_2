@@ -16,7 +16,15 @@ const icons = {
     back: <path d="m15 6-6 6 6 6" />
 }
 
-function Icon({ name, className = "size-5", filled = false }) {
+export type IconName = keyof typeof icons
+
+type IconProps = {
+    name: IconName
+    className?: string
+    filled?: boolean
+}
+
+function Icon({ name, className = "size-5", filled = false }: IconProps) {
     if (filled) {
         return <svg className={className} viewBox="0 0 24 24" fill="currentColor">{icons[name]}</svg>
     }
