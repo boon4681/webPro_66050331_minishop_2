@@ -4,7 +4,8 @@ MiniShop แบบหลายหน้า สร้างด้วย Vite + Re
 
 ```bash
 yarn install
-yarn dev
+yarn api   # Mock REST API (JSON Server) ที่ http://localhost:3001
+yarn dev   # React ที่ http://localhost:5173
 ```
 
 ## Routes
@@ -15,6 +16,7 @@ yarn dev
 | `/dashboard` | Dashboard |
 | `/products` | รายการสินค้า ค้นหา กรองหมวดหมู่ และเรียงราคา |
 | `/products/:id` | รายละเอียดสินค้าตาม ID ใน URL |
+| `/admin/products` | Product Management: เพิ่ม แก้ไข ลบสินค้าผ่าน REST API (ต้องรัน `yarn api`) |
 | `/about` | ข้อมูลร้าน |
 | `/profile` | Profile |
 | อื่น ๆ | 404 Not Found |
